@@ -13,33 +13,31 @@ import (
 )
 
 var (
-	price = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace:   "moex",
-			Subsystem:   "stocks",
-			Name:        "price",
-			Help:        "Current stock market prices",
-			ConstLabels: map[string]string{},
-		},
-		[]string{"security", "variety"},
-	)
+	log = logrus.StandardLogger()
 
 	value = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace:   "moex",
-			Subsystem:   "stocks",
-			Name:        "value",
-			Help:        "Current stock market values",
-			ConstLabels: map[string]string{},
+			Namespace: "moex",
+			Subsystem: "stocks",
+			Name:      "value_total",
+			Help:      "Current stock market values",
 		},
 		[]string{"security"},
 	)
 
-	log = logrus.StandardLogger()
+	price = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "moex",
+			Subsystem: "stocks",
+			Name:      "price_total",
+			Help:      "Current stock market prices",
+		},
+		[]string{"security", "variety"},
+	)
 )
 
 func init() {
-	prometheus.MustRegister(price, value)
+	prometheus.MustRegister(value, price)
 }
 
 func main() {
@@ -75,22 +73,21 @@ func main() {
 				}
 			}
 
-			rates := make(map[string]map[string]float64)
 			for _, m := range data {
 				for _, mkd := range m {
 					id, open, low, high, last, market, today, v, _, err := mkd.Rates()
-					if err == nil {
-						if _, ok := rates[id]; !ok {
-							value.WithLabelValues(id).Set(v)
-
-							price.WithLabelValues(id, "open").Set(open)
-							price.WithLabelValues(id, "low").Set(low)
-							price.WithLabelValues(id, "high").Set(high)
-							price.WithLabelValues(id, "last").Set(last)
-							price.WithLabelValues(id, "market").Set(market)
-							price.WithLabelValues(id, "today").Set(today)
-						}
+					if err != nil {
+						log.Errorf("%v", err)
+						continue
 					}
+
+					value.WithLabelValues(id).Set(v)
+					price.WithLabelValues(id, "open").Set(open)
+					price.WithLabelValues(id, "low").Set(low)
+					price.WithLabelValues(id, "high").Set(high)
+					price.WithLabelValues(id, "last").Set(last)
+					price.WithLabelValues(id, "market").Set(market)
+					price.WithLabelValues(id, "today").Set(today)
 				}
 			}
 
