@@ -51,23 +51,50 @@ func main() {
 
 	log.SetOutput(os.Stdout)
 
-	e := trade.NewExchange()
-	go func(e trade.Exchange) {
-		ticker := time.NewTicker(time.Second)
+	exc := trade.NewExchange()
+
+	eng, err := exc.Engine("stock")
+	if err != nil {
+		log.Errorf("main: %v", err)
+		os.Exit(1)
+	}
+
+	log.Infof("eng: %+v", eng)
+
+	mkt, err := eng.Market("shares")
+	if err != nil {
+		log.Errorf("main: %v", err)
+		os.Exit(1)
+	}
+
+	log.Infof("mkt: %+v", mkt)
+
+	brd, err := mkt.Board("TQBR")
+	if err != nil {
+		log.Errorf("main: %v", err)
+		os.Exit(1)
+	}
+
+	log.Infof("brd: %+v", brd)
+
+	go func(brd trade.Board) {
+		ticker := time.NewTicker(time.Second * 10)
 		for ; true; <-ticker.C {
 			start := time.Now()
 
-			s, err := e.Securities()
+			s, err := brd.Securities()
 			if err != nil {
-				log.Errorf("ticker: %v", err)
+				log.Errorf("main: ticker: %v", err)
 			}
 
 			for _, m := range s {
-				id, open, low, high, last, v, size, err := m.Rates()
+				open, low, high, last, v, size, err := m.Rates()
 				if err != nil {
 					log.Errorf("%v", err)
 					continue
 				}
+
+				id := m.Id()
 
 				value.WithLabelValues(id).Set(v)
 				price.WithLabelValues(id, "open").Set(open)
@@ -75,12 +102,12 @@ func main() {
 				price.WithLabelValues(id, "high").Set(high)
 				price.WithLabelValues(id, "last").Set(last)
 
-				log.Debugf("%s;%f;%f;%f;%f;%f;%f", id, open, low, high, last, v, size)
+				log.Infof("%s;%f;%f;%f;%f;%f;%f", id, open, low, high, last, v, size)
 			}
 
 			log.Infof("rates gathered in %s", time.Since(start))
 		}
-	}(e)
+	}(brd)
 
 	r.Handle("/metrics", promhttp.Handler())
 

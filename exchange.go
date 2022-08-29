@@ -4,64 +4,52 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strings"
 )
 
 type Exchange interface {
-	Securities() ([]Marketdata, error)
+	Engines() (Engines, error)
+	Engine(name string) (Engine, error)
 }
 
 type exchange struct {
-	client *http.Client
-	base   string
-	tools  map[string]string
+	c *http.Client
 }
 
 func NewExchange() Exchange {
 	return &exchange{
-		client: http.DefaultClient,
-		base:   "https://iss.moex.com",
-		tools: map[string]string{
-			"securities": "iss/engines/stock/markets/shares/securities",
-		},
+		c: http.DefaultClient,
 	}
 }
 
-func (e *exchange) Securities() ([]Marketdata, error) {
-	url, err := url.Parse(fmt.Sprintf("%s/%s.json", e.base, e.tools["securities"]))
-	if err != nil {
-		return nil, err
-	}
-
-	r := new(response)
-
-	res, err := e.client.Get(url.String())
+func (e *exchange) Engines() (Engines, error) {
+	res, err := e.c.Get(enginesURI)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	r := new(EnginesResponse)
 
 	err = json.NewDecoder(res.Body).Decode(r)
 	if err != nil {
 		return nil, err
 	}
 
-	marketdata := []Marketdata{}
-	c := r.Marketdata.Columns
-	for _, d := range r.Marketdata.Data {
-		switch v := d[1].(type) {
-		case string:
-			if strings.EqualFold(v, "TQBR") {
-				m, err := NewMarketdata(c, d)
-				if err != nil {
-					return nil, err
-				}
-
-				marketdata = append(marketdata, m)
-			}
-		}
+	engs := []*engine{}
+	for _, data := range r.Engines.Data {
+		name := fmt.Sprintf("%s", data[1])
+		title := fmt.Sprintf("%s", data[2])
+		engs = append(engs, &engine{e, name, title})
 	}
 
-	return marketdata, nil
+	return &engines{e, engs}, nil
+}
+
+func (e *exchange) Engine(name string) (Engine, error) {
+	engs, err := e.Engines()
+	if err != nil {
+		return nil, err
+	}
+
+	return engs.getByName(name), nil
 }
