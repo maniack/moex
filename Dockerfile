@@ -9,7 +9,7 @@ RUN go build -ldflags "-X main.Version=$(git describe --tags --long --always)" .
 RUN cp trade /bin/trade
 
 FROM alpine:latest
-RUN apk --update --no-cache add ca-certificates icu-libs
+RUN apk --update --no-cache add ca-certificates
 COPY --from=builder /bin/trade /bin/trade
 WORKDIR /data
 EXPOSE 3000/tcp

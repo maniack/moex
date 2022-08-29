@@ -20,7 +20,7 @@ var (
 		prometheus.GaugeOpts{
 			Namespace: "moex",
 			Subsystem: "stocks",
-			Name:      "value_total",
+			Name:      "value",
 			Help:      "Current stock market values",
 		},
 		[]string{"security"},
@@ -30,7 +30,7 @@ var (
 		prometheus.GaugeOpts{
 			Namespace: "moex",
 			Subsystem: "stocks",
-			Name:      "price_total",
+			Name:      "price",
 			Help:      "Current stock market prices",
 		},
 		[]string{"security", "variety"},
