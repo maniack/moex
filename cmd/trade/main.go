@@ -75,7 +75,7 @@ func main() {
 				price.WithLabelValues(id, "high").Set(high)
 				price.WithLabelValues(id, "last").Set(last)
 
-				log.Debugf("%s;%f;%f;%f;%f;%f;%f - %s\n", id, open, low, high, last, v, size)
+				log.Debugf("%s;%f;%f;%f;%f;%f;%f", id, open, low, high, last, v, size)
 			}
 
 			log.Infof("rates gathered in %s", time.Since(start))
