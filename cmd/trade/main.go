@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"git.mnc.sh/ilazarev/trade"
@@ -48,47 +49,33 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 
+	log.SetOutput(os.Stdout)
+
 	e := trade.NewExchange()
 	go func(e trade.Exchange) {
-		ticker := time.NewTicker(time.Minute)
+		ticker := time.NewTicker(time.Second)
 		for ; true; <-ticker.C {
 			start := time.Now()
 
 			s, err := e.Securities()
 			if err != nil {
-				log.Errorf("%v", err)
-				continue
+				log.Errorf("ticker: %v", err)
 			}
 
-			data := make(map[string][]trade.Marketdata)
-			for _, sec := range s {
-				if _, ok := data[sec.Id()]; !ok {
-					mkd, err := sec.Marketdata()
-					if err != nil {
-						log.Errorf("%v", err)
-						continue
-					}
-
-					data[sec.Name()] = mkd
+			for _, m := range s {
+				id, open, low, high, last, v, size, err := m.Rates()
+				if err != nil {
+					log.Errorf("%v", err)
+					continue
 				}
-			}
 
-			for _, m := range data {
-				for _, mkd := range m {
-					id, open, low, high, last, market, today, v, _, err := mkd.Rates()
-					if err != nil {
-						log.Errorf("%v", err)
-						continue
-					}
+				value.WithLabelValues(id).Set(v)
+				price.WithLabelValues(id, "open").Set(open)
+				price.WithLabelValues(id, "low").Set(low)
+				price.WithLabelValues(id, "high").Set(high)
+				price.WithLabelValues(id, "last").Set(last)
 
-					value.WithLabelValues(id).Set(v)
-					price.WithLabelValues(id, "open").Set(open)
-					price.WithLabelValues(id, "low").Set(low)
-					price.WithLabelValues(id, "high").Set(high)
-					price.WithLabelValues(id, "last").Set(last)
-					price.WithLabelValues(id, "market").Set(market)
-					price.WithLabelValues(id, "today").Set(today)
-				}
+				log.Debugf("%s;%f;%f;%f;%f;%f;%f - %s\n", id, open, low, high, last, v, size)
 			}
 
 			log.Infof("rates gathered in %s", time.Since(start))

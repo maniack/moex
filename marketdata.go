@@ -6,51 +6,39 @@ import (
 )
 
 type Marketdata interface {
-	Rates() (string, float64, float64, float64, float64, float64, float64, float64, float64, error)
 	Id() string
-	Name() string
+	Rates() (id string, open, low, high, last, value, size float64, err error)
 }
 
 type marketdata struct {
-	s    *security
-	data map[string]interface{}
+	secid string
+	data  map[string]interface{}
 }
 
-func NewMarketdata(s *security, columns []string, data []interface{}) Marketdata {
-	m := marketdata{
-		s:    s,
-		data: make(map[string]interface{}),
+func NewMarketdata(c []string, d []interface{}) (Marketdata, error) {
+	data := make(map[string]interface{})
+	for i, s := range c {
+		data[strings.ToLower(s)] = d[i]
 	}
 
-	for i, column := range columns {
-		m.data[strings.ToLower(column)] = data[i]
+	switch v := d[0].(type) {
+	case string:
+		return &marketdata{v, data}, nil
+	default:
+		return nil, fmt.Errorf("wrong Marketdata format")
 	}
-
-	return &m
 }
 
-func (m *marketdata) Rates() (id string, open, low, high, last, price, today, value, size float64, err error) {
+func (m *marketdata) Id() string {
+	return m.secid
+}
+
+func (m *marketdata) Rates() (id string, open, low, high, last, value, size float64, err error) {
 	switch v := m.data["secid"].(type) {
 	case string:
 		id = v
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for id: %T insterad of string", v)
-	}
-
-	switch v := m.data["marketprice"].(type) {
-	case float32:
-	case float64:
-		price = float64(v)
-	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for open: %T insterad of float64", v)
-	}
-
-	switch v := m.data["marketpricetoday"].(type) {
-	case float32:
-	case float64:
-		today = float64(v)
-	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for open: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for secid: %T instead of string", v)
 	}
 
 	switch v := m.data["open"].(type) {
@@ -58,7 +46,7 @@ func (m *marketdata) Rates() (id string, open, low, high, last, price, today, va
 	case float64:
 		open = float64(v)
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for open: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for open: %T instead of float64", v)
 	}
 
 	switch v := m.data["low"].(type) {
@@ -66,7 +54,7 @@ func (m *marketdata) Rates() (id string, open, low, high, last, price, today, va
 	case float64:
 		low = float64(v)
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for low: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for low: %T instead of float64", v)
 	}
 
 	switch v := m.data["high"].(type) {
@@ -74,7 +62,7 @@ func (m *marketdata) Rates() (id string, open, low, high, last, price, today, va
 	case float64:
 		high = float64(v)
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for high: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for high: %T instead of float64", v)
 	}
 
 	switch v := m.data["last"].(type) {
@@ -82,7 +70,7 @@ func (m *marketdata) Rates() (id string, open, low, high, last, price, today, va
 	case float64:
 		last = float64(v)
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for last: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for last: %T instead of float64", v)
 	}
 
 	switch v := m.data["value"].(type) {
@@ -90,18 +78,10 @@ func (m *marketdata) Rates() (id string, open, low, high, last, price, today, va
 	case float64:
 		value = float64(v)
 	default:
-		return id, open, low, high, last, price, today, value, size, fmt.Errorf("marketdata: wrong type for last: %T insterad of float64", v)
+		return id, open, low, high, last, value, size, fmt.Errorf("marketdata: wrong type for value: %T instead of float64", v)
 	}
 
 	size = value / last
 
-	return id, open, low, high, last, price, today, value, size, nil
-}
-
-func (m *marketdata) Id() string {
-	return m.s.Id()
-}
-
-func (m *marketdata) Name() string {
-	return m.s.Name()
+	return id, open, low, high, last, value, size, nil
 }

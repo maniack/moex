@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Exchange interface {
-	Securities() ([]Security, error)
+	Securities() ([]Marketdata, error)
 }
 
 type exchange struct {
@@ -19,7 +20,7 @@ type exchange struct {
 
 func NewExchange() Exchange {
 	return &exchange{
-		client: &http.Client{},
+		client: http.DefaultClient,
 		base:   "https://iss.moex.com",
 		tools: map[string]string{
 			"securities": "iss/engines/stock/markets/shares/securities",
@@ -27,7 +28,7 @@ func NewExchange() Exchange {
 	}
 }
 
-func (e *exchange) Securities() ([]Security, error) {
+func (e *exchange) Securities() ([]Marketdata, error) {
 	url, err := url.Parse(fmt.Sprintf("%s/%s.json", e.base, e.tools["securities"]))
 	if err != nil {
 		return nil, err
@@ -41,15 +42,26 @@ func (e *exchange) Securities() ([]Security, error) {
 	}
 	defer res.Body.Close()
 
-	err = json.NewDecoder(res.Body).Decode(&r)
+	err = json.NewDecoder(res.Body).Decode(r)
 	if err != nil {
 		return nil, err
 	}
 
-	securities := []Security{}
-	for _, s := range r.Securities.Data {
-		securities = append(securities, NewSecurity(e, r.Securities.Columns, s))
+	marketdata := []Marketdata{}
+	c := r.Marketdata.Columns
+	for _, d := range r.Marketdata.Data {
+		switch v := d[1].(type) {
+		case string:
+			if strings.EqualFold(v, "TQBR") {
+				m, err := NewMarketdata(c, d)
+				if err != nil {
+					return nil, err
+				}
+
+				marketdata = append(marketdata, m)
+			}
+		}
 	}
 
-	return securities, nil
+	return marketdata, nil
 }
