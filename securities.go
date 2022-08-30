@@ -8,6 +8,7 @@ import (
 type Security interface {
 	Id() string
 	Name() string
+	IsTrading() bool
 	Open() (float64, error)
 	Low() (float64, error)
 	High() (float64, error)
@@ -29,6 +30,10 @@ func (s security) Id() string {
 
 func (s security) Name() string {
 	return strings.ToUpper(fmt.Sprintf("%s", s.securitydata.data["latname"]))
+}
+
+func (s security) IsTrading() bool {
+	return strings.EqualFold(strings.ToUpper(fmt.Sprintf("%s", s.marketdata.data["tradingstatus"])), "T")
 }
 
 func (s security) Size() (float64, error) {

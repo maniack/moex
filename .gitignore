@@ -1,0 +1,8 @@
+.vscode/
+dist/
+debug
+*_test.go
+*.exe
+*_bin
+*.bin
+*.db

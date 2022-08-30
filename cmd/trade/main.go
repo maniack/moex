@@ -55,24 +55,21 @@ func main() {
 
 	eng, err := exc.Engine("stock")
 	if err != nil {
-		log.Errorf("main: %v", err)
-		os.Exit(1)
+		log.Fatalf("main: %v", err)
 	}
 
 	log.Infof("eng: %+v", eng)
 
 	mkt, err := eng.Market("shares")
 	if err != nil {
-		log.Errorf("main: %v", err)
-		os.Exit(1)
+		log.Fatalf("main: %v", err)
 	}
 
 	log.Infof("mkt: %+v", mkt)
 
 	brd, err := mkt.Board("TQBR")
 	if err != nil {
-		log.Errorf("main: %v", err)
-		os.Exit(1)
+		log.Fatalf("main: %v", err)
 	}
 
 	log.Infof("brd: %+v", brd)
@@ -88,13 +85,17 @@ func main() {
 			}
 
 			for _, m := range s {
-				open, low, high, last, v, size, err := m.Rates()
-				if err != nil {
-					log.Errorf("%v", err)
+				if !m.IsTrading() {
 					continue
 				}
 
 				id := m.Id()
+
+				open, low, high, last, v, size, err := m.Rates()
+				if err != nil {
+					log.Warningf("main: ticker: %q: %v", id, err)
+					continue
+				}
 
 				value.WithLabelValues(id).Set(v)
 				price.WithLabelValues(id, "open").Set(open)
@@ -102,7 +103,7 @@ func main() {
 				price.WithLabelValues(id, "high").Set(high)
 				price.WithLabelValues(id, "last").Set(last)
 
-				log.Infof("%s;%f;%f;%f;%f;%f;%f", id, open, low, high, last, v, size)
+				log.Debugf("%s;%f;%f;%f;%f;%f;%f", id, open, low, high, last, v, size)
 			}
 
 			log.Infof("rates gathered in %s", time.Since(start))
