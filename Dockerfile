@@ -11,6 +11,5 @@ RUN cp moex_exporter /bin/moex_exporter
 FROM alpine:latest
 RUN apk --update --no-cache add ca-certificates
 COPY --from=builder /bin/moex_exporter /bin/moex_exporter
-WORKDIR /data
-EXPOSE 3000/tcp
+EXPOSE 9927/tcp
 ENTRYPOINT ["/bin/moex_exporter"]
