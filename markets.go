@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Markets - marget list
 type Markets interface {
 	getByName(name string) Market
 }
@@ -24,6 +25,7 @@ func (m markets) getByName(name string) Market {
 	return nil
 }
 
+// Market - market ¯\_(ツ)_/¯
 type Market interface {
 	Boards() (Boards, error)
 	Board(name string) (Board, error)
@@ -35,6 +37,7 @@ type market struct {
 	title string
 }
 
+// Boards - get list of market boards
 func (m *market) Boards() (Boards, error) {
 	res, err := m.eng.ex.c.Get(fmt.Sprintf(boardsURI, m.eng.name, m.name))
 	if err != nil {
@@ -59,6 +62,7 @@ func (m *market) Boards() (Boards, error) {
 	return &boards{m, brds}, nil
 }
 
+// Board - get board by name (e.g.: (moex.Market).Board("EQBR"))
 func (m *market) Board(name string) (Board, error) {
 	brds, err := m.Boards()
 	if err != nil {

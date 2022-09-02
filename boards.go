@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Boards - board list
 type Boards interface {
 	getByName(name string) Board
 }
@@ -24,6 +25,7 @@ func (b boards) getByName(name string) Board {
 	return nil
 }
 
+// Board - board (trading mode)
 type Board interface {
 	Securities() ([]Security, error)
 	Security(id string) (Security, error)
@@ -35,6 +37,7 @@ type board struct {
 	title string
 }
 
+// Securities - board securities list
 func (b board) Securities() ([]Security, error) {
 	res, err := b.mkt.eng.ex.c.Get(fmt.Sprintf(securitiesURI, b.mkt.eng.name, b.mkt.name, b.name))
 	if err != nil {
@@ -69,6 +72,7 @@ func (b board) Securities() ([]Security, error) {
 	return secs, nil
 }
 
+// Security - get security by secid (e.g.: (moex.Board).Security("APPL"))
 func (b board) Security(id string) (Security, error) {
 	secs, err := b.Securities()
 	if err != nil {
@@ -76,7 +80,7 @@ func (b board) Security(id string) (Security, error) {
 	}
 
 	for _, sec := range secs {
-		if strings.EqualFold(strings.ToLower(sec.Id()), strings.ToLower(id)) {
+		if strings.EqualFold(strings.ToLower(sec.ID()), strings.ToLower(id)) {
 			return sec, nil
 		}
 	}

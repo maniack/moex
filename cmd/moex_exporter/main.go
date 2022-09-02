@@ -95,7 +95,7 @@ func main() {
 					continue
 				}
 
-				id := m.Id()
+				id := m.ID()
 
 				open, low, high, last, v, size, err := m.Rates()
 				if err != nil {

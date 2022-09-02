@@ -12,12 +12,14 @@ const (
 	securityURI   string = `https://iss.moex.com/iss/engines/%s/markets/%s/boards/%s/securities/%s.json`
 )
 
+// Response - MOEX API generic response
 type Response struct {
 	Metadata map[string]interface{} `json:"metadata"`
 	Columns  []string               `json:"columns"`
 	Data     [][]interface{}        `json:"data"`
 }
 
+// Response - MOEX API IIS response
 type IisResponse struct {
 	Engines             Response `json:"engines"`
 	Markets             Response `json:"markets"`
@@ -29,20 +31,24 @@ type IisResponse struct {
 	SecurityCollections Response `json:"securitycollections"`
 }
 
+// Response - MOEX API engine list response
 type EnginesResponse struct {
 	Engines Response `json:"engines"`
 }
 
+// Response - MOEX API engine response
 type EngineResponse struct {
 	Engine     Response `json:"engine"`
 	TimeTable  Response `json:"timetable"`
 	DailyTable Response `json:"dailytable"`
 }
 
+// Response - MOEX API market list response
 type MarketsResponse struct {
 	Markets Response `json:"markets"`
 }
 
+// Response - MOEX API market response
 type MarketResponse struct {
 	Boards           Response `json:"boards"`
 	BoardGroups      Response `json:"boardgroups"`
@@ -57,14 +63,17 @@ type MarketResponse struct {
 	HistoryYields    Response `json:"history_yields"`
 }
 
+// Response - MOEX API board list response
 type BoardsResponse struct {
 	Boards Response `json:"boards"`
 }
 
+// Response - MOEX API board response
 type BoardResponse struct {
 	Board Response `json:"board"`
 }
 
+// Response - MOEX API securitiy list response
 type SecuritiesResponse struct {
 	Securities       Response `json:"securities"`
 	MarketData       Response `json:"marketdata"`
@@ -72,6 +81,7 @@ type SecuritiesResponse struct {
 	MarketdataYields Response `json:"marketdata_yields"`
 }
 
+// Response - MOEX API securitiy response
 type SecurityResponse struct {
 	Securities       Response `json:"securities"`
 	MarketData       Response `json:"marketdata"`

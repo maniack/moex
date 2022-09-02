@@ -2,6 +2,7 @@ package moex
 
 import "fmt"
 
+//MarketData - return security rates
 type MarketData interface {
 	Open() (float64, error)
 	Low() (float64, error)
@@ -16,6 +17,7 @@ type marketdata struct {
 	data map[string]interface{}
 }
 
+// Open - open price
 func (m marketdata) Open() (float64, error) {
 	retval := 0.0
 
@@ -30,6 +32,7 @@ func (m marketdata) Open() (float64, error) {
 	return retval, nil
 }
 
+// Low - lower price
 func (m marketdata) Low() (float64, error) {
 	retval := 0.0
 
@@ -44,6 +47,7 @@ func (m marketdata) Low() (float64, error) {
 	return retval, nil
 }
 
+// High - high price
 func (m marketdata) High() (float64, error) {
 	retval := 0.0
 
@@ -58,6 +62,7 @@ func (m marketdata) High() (float64, error) {
 	return retval, nil
 }
 
+// Last - last trade price
 func (m marketdata) Last() (float64, error) {
 	retval := 0.0
 
@@ -72,6 +77,7 @@ func (m marketdata) Last() (float64, error) {
 	return retval, nil
 }
 
+// Value - last trade volume
 func (m marketdata) Value() (float64, error) {
 	retval := 0.0
 
@@ -86,6 +92,7 @@ func (m marketdata) Value() (float64, error) {
 	return retval, nil
 }
 
+// Size - last trade item count
 func (m marketdata) Size() (float64, error) {
 	value, err := m.Value()
 	if err != nil {
@@ -106,6 +113,7 @@ func (m marketdata) Size() (float64, error) {
 	return retval, nil
 }
 
+// Rates - shugar to get all rates in one line
 func (m marketdata) Rates() (open, low, high, last, value, size float64, err error) {
 	open, err = m.Open()
 	if err != nil {

@@ -5,8 +5,9 @@ import (
 	"strings"
 )
 
+// Security - trading item
 type Security interface {
-	Id() string
+	ID() string
 	Name() string
 	IsTrading() bool
 	Open() (float64, error)
@@ -24,18 +25,22 @@ type security struct {
 	marketdata
 }
 
-func (s security) Id() string {
+// ID - return security secid string (e.g.: APPL)
+func (s security) ID() string {
 	return strings.ToUpper(fmt.Sprintf("%s", s.securitydata.data["secid"]))
 }
 
+// Name - return security name string (e.g.: Apple Inc.)
 func (s security) Name() string {
 	return strings.ToUpper(fmt.Sprintf("%s", s.securitydata.data["latname"]))
 }
 
+// IsTrading - return true if security status is Trading ("T")
 func (s security) IsTrading() bool {
 	return strings.EqualFold(strings.ToUpper(fmt.Sprintf("%s", s.marketdata.data["tradingstatus"])), "T")
 }
 
+// Size - security lot size
 func (s security) Size() (float64, error) {
 	retval := 0.0
 

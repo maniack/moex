@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Engines - trading engine list
 type Engines interface {
 	getByName(name string) Engine
 }
@@ -24,6 +25,7 @@ func (e engines) getByName(name string) Engine {
 	return nil
 }
 
+// Engine - trading engine
 type Engine interface {
 	Markets() (Markets, error)
 	Market(name string) (Market, error)
@@ -35,6 +37,7 @@ type engine struct {
 	title string
 }
 
+// Markets - get engine merket list
 func (e *engine) Markets() (Markets, error) {
 	res, err := e.ex.c.Get(fmt.Sprintf(marketsURI, e.name))
 	if err != nil {
@@ -59,6 +62,7 @@ func (e *engine) Markets() (Markets, error) {
 	return &markets{e, mkts}, nil
 }
 
+// Market - get market by name (e.g.: (moex.Engine).Market("stock"))
 func (e *engine) Market(name string) (Market, error) {
 	mkts, err := e.Markets()
 	if err != nil {
