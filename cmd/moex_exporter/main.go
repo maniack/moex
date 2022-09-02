@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"git.mnc.sh/ilazarev/moex"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/maniack/moex"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"

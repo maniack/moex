@@ -1,4 +1,4 @@
-module git.mnc.sh/ilazarev/moex
+module github.com/maniack/moex
 
 go 1.18
 

@@ -1,6 +1,6 @@
 FROM golang:alpine AS builder
 RUN apk --update --no-cache add build-base git
-WORKDIR $GOPATH/src/git.mnc.sh/ilazarev/moex_exporter
+WORKDIR $GOPATH/src/github.com/maniack/moex_exporter
 COPY . ./
 RUN go get
 RUN go generate ./...
