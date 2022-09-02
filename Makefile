@@ -1,4 +1,4 @@
-BINARY=trade
+BINARY=moex_exporter
 VERSION=$(shell git describe --tags --always)
 BUILD=$(shell git describe --tags --long --always)
 LDFLAGS=-ldflags "-X main.Version=$(BUILD)"

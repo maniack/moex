@@ -1,4 +1,4 @@
-package trade
+package moex
 
 import (
 	"encoding/json"

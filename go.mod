@@ -1,4 +1,4 @@
-module git.mnc.sh/ilazarev/trade
+module git.mnc.sh/ilazarev/moex
 
 go 1.18
 

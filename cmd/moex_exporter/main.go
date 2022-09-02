@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 	"os"
 	"time"
 
-	"git.mnc.sh/ilazarev/trade"
+	"git.mnc.sh/ilazarev/moex"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
@@ -42,6 +43,11 @@ func init() {
 }
 
 func main() {
+	interval := time.Second * 10
+
+	flag.DurationVar(&interval, "i", time.Second*10, "MOEX API polling interval")
+	flag.DurationVar(&interval, "-interval", time.Second*10, "MOEX API polling interval")
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.CleanPath)
@@ -51,7 +57,7 @@ func main() {
 
 	log.SetOutput(os.Stdout)
 
-	exc := trade.NewExchange()
+	exc := moex.NewExchange()
 
 	eng, err := exc.Engine("stock")
 	if err != nil {
@@ -74,8 +80,8 @@ func main() {
 
 	log.Infof("brd: %+v", brd)
 
-	go func(brd trade.Board) {
-		ticker := time.NewTicker(time.Second * 10)
+	go func(brd moex.Board) {
+		ticker := time.NewTicker(interval)
 		for ; true; <-ticker.C {
 			start := time.Now()
 
@@ -112,5 +118,5 @@ func main() {
 
 	r.Handle("/metrics", promhttp.Handler())
 
-	http.ListenAndServe(":3000", r)
+	http.ListenAndServe(":9927", r)
 }

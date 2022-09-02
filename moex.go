@@ -1,4 +1,4 @@
-package trade
+package moex
 
 const (
 	iisURI        string = `https://iss.moex.com/iss.json`
