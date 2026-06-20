@@ -4,8 +4,8 @@ github.com/beorn7/perks/quantile
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/go-chi/chi/v5 v5.2.2
-## explicit; go 1.20
+# github.com/go-chi/chi/v5 v5.2.4
+## explicit; go 1.22
 github.com/go-chi/chi/v5
 github.com/go-chi/chi/v5/middleware
 # github.com/golang/protobuf v1.5.2
